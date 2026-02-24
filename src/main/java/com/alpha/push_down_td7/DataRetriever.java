@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataRetriever {
-    private final DatabaseConnection dbConnection;
+    private final DBConnection dbConnection;
 
-    public DataRetriever(DatabaseConnection dbConnection) {
+    public DataRetriever(DBConnection dbConnection) {
         this.dbConnection = dbConnection;
     }
 
