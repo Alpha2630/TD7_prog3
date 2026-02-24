@@ -45,4 +45,26 @@ public class DataRetriever {
         }
         return result;
     }
+    public List<CandidateVoteCount> countValidVotesByCandidate() throws SQLException {
+        List<CandidateVoteCount> result = new ArrayList<>();
+        String sql = "SELECT c.name as candidate_name, " +
+                "COUNT(CASE WHEN v.vote_type = 'VALID' THEN v.id END) as valid_vote " +
+                "FROM candidate c " +
+                "LEFT JOIN vote v ON c.id = v.candidate_id " +
+                "GROUP BY c.id, c.name " +
+                "ORDER BY c.name";
+
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                result.add(new CandidateVoteCount(
+                        rs.getString("candidate_name"),
+                        rs.getLong("valid_vote")
+                ));
+            }
+        }
+        return result;
+    }
 }
