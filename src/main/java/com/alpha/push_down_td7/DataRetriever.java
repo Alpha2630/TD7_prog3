@@ -106,5 +106,26 @@ public class DataRetriever {
             return 0.0;
         }
     }
+    public ElectionResult findWinner() throws SQLException {
+        String sql = "SELECT c.name as candidate_name, " +
+                "COUNT(CASE WHEN v.vote_type = 'VALID' THEN v.id END) as valid_vote_count " +
+                "FROM candidate c " +
+                "LEFT JOIN vote v ON c.id = v.candidate_id " +
+                "GROUP BY c.id, c.name " +
+                "ORDER BY valid_vote_count DESC " +
+                "LIMIT 1";
 
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return new ElectionResult(
+                        rs.getString("candidate_name"),
+                        rs.getLong("valid_vote_count")
+                );
+            }
+            return new ElectionResult("Aucun candidat", 0L);
+        }
+    }
 }
