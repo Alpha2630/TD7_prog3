@@ -67,4 +67,44 @@ public class DataRetriever {
         }
         return result;
     }
+
+    public VoteSummary computeVoteSummary() throws SQLException {
+        String sql = "SELECT " +
+                "COUNT(CASE WHEN vote_type = 'VALID' THEN id END) as valid_count, " +
+                "COUNT(CASE WHEN vote_type = 'BLANK' THEN id END) as blank_count, " +
+                "COUNT(CASE WHEN vote_type = 'NULL' THEN id END) as null_count " +
+                "FROM vote";
+
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return new VoteSummary(
+                        rs.getLong("valid_count"),
+                        rs.getLong("blank_count"),
+                        rs.getLong("null_count")
+                );
+            }
+            return new VoteSummary(0L, 0L, 0L);
+        }
+    }
+
+
+    public double computeTurnoutRate() throws SQLException {
+        String sql = "SELECT " +
+                "(SELECT COUNT(id) FROM vote)::float / " +
+                "(SELECT COUNT(id) FROM voter) * 100.0 as turnout_rate";
+
+        Connection conn = dbConnection.getConnection();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getDouble("turnout_rate");
+            }
+            return 0.0;
+        }
+    }
+
 }
